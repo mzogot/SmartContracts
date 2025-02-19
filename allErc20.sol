@@ -1,91 +1,40 @@
-
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+// Compatible with OpenZeppelin Contracts ^5.0.0
+pragma solidity ^0.8.22;
 
-contract tokenc {
-    string public name = "console";
-    string public symbol = "CON";
-    uint8 public decimals = 18;
-    uint256 public totalSupply = 1000000 * (10 ** uint256(decimals));
-    address public owner;
-   
-    mapping(address => uint256) balances;
-    mapping(address => mapping(address => uint256)) allowances;
-   
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-   
-    constructor() {
-        owner = msg.sender;
-        balances[owner] = totalSupply;
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {ERC20Pausable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+contract TestMon is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit {
+    constructor(address initialOwner, address recipient)
+        ERC20("TestMon", "TMON")
+        Ownable(initialOwner)
+        ERC20Permit("TestMon")
+    {
+        _mint(recipient, 210000000 * 10 ** decimals());
     }
-   
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can call this function.");
-        _;
+
+    function pause() public onlyOwner {
+        _pause();
     }
-   
-    function balanceOf(address account) public view returns (uint256) {
-        return balances[account];
+
+    function unpause() public onlyOwner {
+        _unpause();
     }
-   
-    function transfer(address recipient, uint256 amount) public returns (bool) {
-        require(recipient != address(0), "ERC20: transfer to the zero address");
-        require(amount <= balances[msg.sender], "ERC20: transfer amount exceeds balance");
-       
-        balances[msg.sender] -= amount;
-        balances[recipient] += amount;
-       
-        emit Transfer(msg.sender, recipient, amount);
-       
-        return true;
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
     }
-   
-    function approve(address spender, uint256 amount) public returns (bool) {
-        allowances[msg.sender][spender] = amount;
-       
-        emit Approval(msg.sender, spender, amount);
-       
-        return true;
-    }
-   
-    function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
-        require(recipient != address(0), "ERC20: transfer to the zero address");
-        require(amount <= balances[sender], "ERC20: transfer amount exceeds balance");
-        require(amount <= allowances[sender][msg.sender], "ERC20: transfer amount exceeds allowance");
-       
-        balances[sender] -= amount;
-        balances[recipient] += amount;
-        allowances[sender][msg.sender] -= amount;
-       
-        emit Transfer(sender, recipient, amount);
-       
-        return true;
-    }
-   
-    function allowance(address account, address spender) public view returns (uint256) {
-        return allowances[account][spender];
-    }
-   
-    function burn(uint256 amount) public returns (bool) {
-        require(amount <= balances[msg.sender], "ERC20: burn amount exceeds balance");
-       
-        balances[msg.sender] -= amount;
-        totalSupply -= amount;
-       
-        emit Transfer(msg.sender, address(0), amount);
-       
-        return true;
-    }
-   
-    function mint(uint256 amount) public onlyOwner returns (bool) {
-        require(totalSupply + amount <= 2**256 - 1, "ERC20: total supply exceeds uint256");
-       
-        balances[owner] += amount;
-        totalSupply += amount;
-       
-        emit Transfer(address(0), owner, amount);
-       
-        return true;
+
+    // The following functions are overrides required by Solidity.
+
+    function _update(address from, address to, uint256 value)
+        internal
+        override(ERC20, ERC20Pausable)
+    {
+        super._update(from, to, value);
     }
 }
