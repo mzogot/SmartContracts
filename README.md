@@ -7,7 +7,7 @@ Smart Contracts for protocol testing and Deployments
 Before you deploy an NFT, you need an **image and metadata** file.
 
 1. **Upload Your Image to IPFS**  
-   - Use [Pinata](https://www.pinata.cloud/) or [NFT.Storage](https://nft.storage/) to upload your image.
+   - Use [Pinata](https://www.pinata.cloud/) to upload your image.
    - After uploading, copy the **CID (Content Identifier)**.
    - Example image URL:  
      ```
